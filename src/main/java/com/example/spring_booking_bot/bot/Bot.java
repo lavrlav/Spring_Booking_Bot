@@ -1,4 +1,4 @@
-package com.example.spring_booking_bot;
+package com.example.spring_booking_bot.bot;
 
 import com.example.spring_booking_bot.commands.LoginCommand;
 import com.example.spring_booking_bot.commands.WorkerCommand;
@@ -48,6 +48,8 @@ public class Bot extends TelegramLongPollingBot {
 
         list.add(new LoginCommand());
 
+
+
         for(WorkerCommand w: list){
             if(w.start(update)!=null){
                 sendMessage = w.start(update);
@@ -60,6 +62,8 @@ public class Bot extends TelegramLongPollingBot {
         } catch (TelegramApiException e) {
             throw new RuntimeException(e);
         }
+
+
 
     }
 }
