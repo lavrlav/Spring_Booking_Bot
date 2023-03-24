@@ -9,5 +9,4 @@ public class SpringBookingBotApplication {
     public static void main(String[] args) {
         SpringApplication.run(SpringBookingBotApplication.class, args);
     }
-
 }

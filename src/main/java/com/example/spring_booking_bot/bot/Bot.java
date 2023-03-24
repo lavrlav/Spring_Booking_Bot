@@ -3,6 +3,7 @@ package com.example.spring_booking_bot.bot;
 import com.example.spring_booking_bot.commands.LoginCommand;
 import com.example.spring_booking_bot.commands.WorkerCommand;
 import com.example.spring_booking_bot.repos.UserRepo;
+import lombok.Data;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -19,6 +20,7 @@ import java.util.List;
 @Component
 public class Bot extends TelegramLongPollingBot {
 
+
     @Override
     public String getBotUsername() {
         return "my_spring_medicine_bot";
@@ -31,12 +33,24 @@ public class Bot extends TelegramLongPollingBot {
 
     @Override
     public void onUpdateReceived(Update update) {
+       SendMessage sendMessage = new SendMessage();
+//        sendMessage.setChatId(update.getMessage().getChatId().toString());
+//        sendMessage.setText("Hi");
+//        if(update.hasMessage()){
+//            try {
+//                execute(sendMessage);
+//            } catch (TelegramApiException e) {
+//                throw new RuntimeException(e);
+//            }
+//        }
+
+
         KeyboardRow k = new KeyboardRow();
 
-            k.add(new KeyboardButton("Log In"));
+        k.add(new KeyboardButton("Log In"));
 
         k.add(new KeyboardButton("Записаться к врачу"));
-        SendMessage sendMessage = new SendMessage();
+        // SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(update.getMessage().getChatId().toString());
         sendMessage.setText("Выберите действие");
 
@@ -49,9 +63,8 @@ public class Bot extends TelegramLongPollingBot {
         list.add(new LoginCommand());
 
 
-
-        for(WorkerCommand w: list){
-            if(w.start(update)!=null){
+        for (WorkerCommand w : list) {
+            if (w.start(update) != null) {
                 sendMessage = w.start(update);
                 break;
             }
@@ -64,6 +77,6 @@ public class Bot extends TelegramLongPollingBot {
         }
 
 
-
     }
 }
+
