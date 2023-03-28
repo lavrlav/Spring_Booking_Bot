@@ -1,4 +1,4 @@
-package com.example.spring_booking_bot.models;
+package com.example.spring_booking_bot.entity;
 
 import lombok.Data;
 
@@ -7,7 +7,7 @@ import javax.persistence.*;
 @Table(name="telegram_user")
 @Entity
 @Data
-public class UserModel {
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     long id;

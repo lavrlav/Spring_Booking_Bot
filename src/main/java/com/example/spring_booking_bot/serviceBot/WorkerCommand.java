@@ -1,4 +1,4 @@
-package com.example.spring_booking_bot.commands;
+package com.example.spring_booking_bot.serviceBot;
 
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;

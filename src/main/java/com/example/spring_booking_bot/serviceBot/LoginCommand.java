@@ -1,7 +1,8 @@
-package com.example.spring_booking_bot.commands;
+package com.example.spring_booking_bot.serviceBot;
 
-import com.example.spring_booking_bot.helpers.UserHelper;
-import com.example.spring_booking_bot.models.UserModel;
+import com.example.spring_booking_bot.entity.User;
+import com.example.spring_booking_bot.serviceUser.UserService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -12,8 +13,10 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import java.util.Collections;
 
 @Component
-
+@RequiredArgsConstructor
 public class LoginCommand implements WorkerCommand {
+    private final UserService userService;
+
     @Override
     public SendMessage start(Update update) {
         if (!update.getMessage().getText().equals("Log In")
@@ -25,35 +28,20 @@ public class LoginCommand implements WorkerCommand {
         sendMessage.setText("Выберите действие");
         sendMessage.setChatId(update.getMessage().getChatId().toString());
 
-
         if (update.getMessage().getText().equals("Log In")) {
             KeyboardRow keyboardRow = new KeyboardRow();
             keyboardRow.add(new KeyboardButton("Оставить свое имя"));
             keyboardRow.add(new KeyboardButton("Остаться анонимом"));
 
-
             ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
             replyKeyboardMarkup.setKeyboard(Collections.singletonList(keyboardRow));
 
             sendMessage.setReplyMarkup(replyKeyboardMarkup);
+            return sendMessage;
         }
 
-        UserModel userModel = new UserModel();
-        userModel.setUsername(update.getMessage().getFrom().getUserName());
-        userModel.setTgId(update.getMessage().getFrom().getId().toString());
+       return sendMessage;
 
-        if (update.getMessage().getText().equals("Остаться анонимом")) {
-            sendMessage.setText("Пользователь сохранен");
-            UserHelper.saveUser(userModel);
-
-        }
-        if (update.getMessage().getText().equals("Оставить свое имя")) {
-            sendMessage.setText("Пользователь сохранен");
-            userModel.setName(update.getMessage().getFrom().getFirstName());
-            UserHelper.saveUser(userModel);
-        }
-
-        return sendMessage;
     }
 
     @Override
@@ -61,3 +49,5 @@ public class LoginCommand implements WorkerCommand {
         return null;
     }
 }
+
+

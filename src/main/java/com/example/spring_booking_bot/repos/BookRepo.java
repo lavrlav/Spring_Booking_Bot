@@ -1,11 +1,10 @@
 package com.example.spring_booking_bot.repos;
 
-import com.example.spring_booking_bot.entity.User;
+import com.example.spring_booking_bot.entity.BookModel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface UserRepo extends JpaRepository<User, Long>{
-    User findUserModelByTgId(String id);
+public interface BookRepo extends JpaRepository<BookModel, Long> {
 
 }
