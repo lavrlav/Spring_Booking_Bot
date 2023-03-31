@@ -5,38 +5,41 @@ import com.example.spring_booking_bot.repos.UserRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Update;
 
 @Component
 @RequiredArgsConstructor
 public class UserService {
+
     private final UserRepo userRepo;
-    private final User user;
-    SendMessage sendMessage = new SendMessage();
-    Update update = new Update();
-    public SendMessage saveUserAnonymous(User u) {
+    private static UserService userService = null;
 
-        user.setUsername(update.getMessage().getFrom().getUserName());
-        user.setTgId(update.getMessage().getFrom().getId().toString());
-
-        if (update.getMessage().getText().equals("Остаться анонимом")) {
-            sendMessage.setText("Пользователь сохранен");
-        }
-        userRepo.save(u);
-        return sendMessage;
-
+    public SendMessage saveUserAnonymous(String tgChatId) {
+        User anonUser = User.builder()
+                .tgId(tgChatId)
+                .build();
+        userRepo.save(anonUser);
+        return SendMessage.builder()
+                .text("Пользователь сохранен")
+                .chatId(tgChatId)
+                .build();
     }
 
-    public SendMessage saveUserName(User u){
+    public SendMessage saveUserName(String nameTg, String userName, String tgChatId) {
+        User nameUser = User.builder()
+                .tgId(tgChatId)
+                .name(nameTg)
+                .username(userName)
+                .build();
+        userRepo.save(nameUser);
+        return SendMessage.builder()
+                .text("Пользователь сохранен")
+                .chatId(tgChatId)
+                .build();
+    }
 
-        user.setUsername(update.getMessage().getFrom().getUserName());
-        user.setTgId(update.getMessage().getFrom().getId().toString());
-
-        if (update.getMessage().getText().equals("Оставить свое имя")) {
-            sendMessage.setText("Пользователь сохранен");
-            user.setName(update.getMessage().getFrom().getFirstName());
-        }
-        userRepo.save(u);
-        return sendMessage;
+    public static User findUser(String tgId){
+       User user;
+        user = userService.userRepo.findUserModelByTgId(tgId);
+        return user;
     }
 }

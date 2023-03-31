@@ -24,7 +24,7 @@ public class Bot extends TelegramLongPollingBot {
 
     private final BookCommand bookCommand;
     private final UserService userService;
-    private final User user;
+    // private final User user;
 
     @Override
     public String getBotUsername() {
@@ -53,10 +53,16 @@ public class Bot extends TelegramLongPollingBot {
         replyKeyboardMarkup.setKeyboard(Collections.singletonList(k));
         sendMessage.setReplyMarkup(replyKeyboardMarkup);
 
+        String tgUserFName = update.getMessage().getFrom().getFirstName();
+        String tgUserName = update.getMessage().getFrom().getUserName();
+        String idChatTg = update.getMessage().getChatId().toString();
+
+
         switch (requestMsg) {
             case "Log In" -> sendMessage = loginCommand.start(update);
-            case "Остаться анонимом" -> sendMessage = userService.saveUserAnonymous(user);
-            case "Оставить свое имя" -> sendMessage = userService.saveUserName(user);
+            case "Остаться анонимом" ->
+                    sendMessage = userService.saveUserAnonymous(update.getMessage().getChatId().toString());
+            case "Оставить свое имя" -> sendMessage = userService.saveUserName(tgUserFName, tgUserName, idChatTg);
             case "Записаться к врачу" -> sendMessage = bookCommand.start(update);
         }
 
