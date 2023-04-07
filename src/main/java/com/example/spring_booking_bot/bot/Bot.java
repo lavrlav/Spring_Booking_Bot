@@ -1,30 +1,26 @@
 package com.example.spring_booking_bot.bot;
 
-import com.example.spring_booking_bot.entity.User;
-import com.example.spring_booking_bot.serviceBot.BookCommand;
-import com.example.spring_booking_bot.serviceBot.LoginCommand;
-import com.example.spring_booking_bot.serviceUser.UserService;
+import com.example.spring_booking_bot.entity.enums.Specialisation;
+import com.example.spring_booking_bot.service.*;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.stereotype.Component;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
-import java.util.Collections;
+import java.util.Arrays;
+import java.util.List;
 
 @Component
 @RequiredArgsConstructor
 public class Bot extends TelegramLongPollingBot {
-
-    private final LoginCommand loginCommand;
-
-    private final BookCommand bookCommand;
     private final UserService userService;
-    // private final User user;
+    private final DoctorService doctorService;
+    private final AppointmentService appointmentService;
+    private final AvailabilityService availabilityService;
+    private final TgBotService botService;
+
 
     @Override
     public String getBotUsername() {
@@ -36,43 +32,52 @@ public class Bot extends TelegramLongPollingBot {
         return "6287934992:AAHjux_d1UY87hTBxIxdlyyxAUX-ypFNzD8";
     }
 
+    @SneakyThrows
     @Override
     public void onUpdateReceived(Update update) {
-        String requestMsg = update.getMessage().getText();
+        final String receivedMessage = update.getMessage().getText();
+        final long chatId = update.getMessage().getChatId();
+        SendMessage responseMsg;
 
-        SendMessage sendMessage = new SendMessage();
-
-        KeyboardRow k = new KeyboardRow();
-        k.add(new KeyboardButton("Log In"));
-        k.add(new KeyboardButton("Записаться к врачу"));
-
-        sendMessage.setChatId(update.getMessage().getChatId().toString());
-        sendMessage.setText("Выберите действие");
-
-        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-        replyKeyboardMarkup.setKeyboard(Collections.singletonList(k));
-        sendMessage.setReplyMarkup(replyKeyboardMarkup);
-
-        String tgUserFName = update.getMessage().getFrom().getFirstName();
-        String tgUserName = update.getMessage().getFrom().getUserName();
-        String idChatTg = update.getMessage().getChatId().toString();
-
-
-        switch (requestMsg) {
-            case "Log In" -> sendMessage = loginCommand.start(update);
-            case "Остаться анонимом" ->
-                    sendMessage = userService.saveUserAnonymous(update.getMessage().getChatId().toString());
-            case "Оставить свое имя" -> sendMessage = userService.saveUserName(tgUserFName, tgUserName, idChatTg);
-            case "Записаться к врачу" -> sendMessage = bookCommand.start(update);
+        if (receivedMessage.equals("/start")) {
+            final String firstName = update.getMessage().getFrom().getFirstName();
+            final String lastName = update.getMessage().getFrom().getLastName();
+            responseMsg = userService.saveNewUser(firstName, lastName, chatId);
+        } else if (receivedMessage.equals("/make_appointment")) {
+            responseMsg = doctorService.getDoctorsList(chatId);
+        } else if (checkSpecialisation(receivedMessage)) {
+            responseMsg = availabilityService.getAvailabilities(receivedMessage, chatId);
+        } else if (receivedMessage.equals("/my_appointments")) {
+            responseMsg = appointmentService.getAllAppointments(chatId);
+        } else if (receivedMessage.equals("/help")) {
+            responseMsg = botService.getHelpMessage(chatId);
+        } else if (receivedMessage.startsWith("/cancel_")) {
+            responseMsg = appointmentService.cancelAppointment(receivedMessage, chatId);
+        } else if (checkAvailabilities(receivedMessage.substring(1))) {
+            responseMsg = appointmentService.makeAppointment(receivedMessage, chatId);
+        } else {
+            responseMsg = botService.getBadRequestMessage(chatId);
         }
 
-
-        try {
-            execute(sendMessage);
-        } catch (TelegramApiException e) {
-            throw new RuntimeException(e);
-        }
-
+        execute(responseMsg);
     }
+
+    private boolean checkSpecialisation(final String receivedMessage) {
+        final List<String> specialisations = Arrays.stream(Specialisation.values())
+                .map(s -> s.value)
+                .toList();
+        return specialisations.contains(receivedMessage);
+    }
+
+    private boolean checkAvailabilities(final String idFromMessage) {
+        final long availabilityId;
+        try {
+            availabilityId = Long.parseLong(idFromMessage);
+        } catch (NumberFormatException e) {
+            return false;
+        }
+        return availabilityService.findById(availabilityId).isPresent();
+    }
+
 }
 

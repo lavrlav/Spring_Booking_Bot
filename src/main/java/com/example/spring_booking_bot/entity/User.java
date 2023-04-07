@@ -1,14 +1,16 @@
 package com.example.spring_booking_bot.entity;
 
-import com.example.spring_booking_bot.serviceUser.DoctorEnum;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
-@Table(name="telegram_user")
+@Table(name = "tg_user")
 @Entity
 @Data
 @Builder
@@ -16,19 +18,10 @@ import javax.persistence.*;
 @NoArgsConstructor
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    long id;
-
-    @Column(name="user_name")
-    String username;
-
-    @Column(name="telegram_id")
-    String tgId;
-
-    @Column(name="name")
-    String name;
-
-    @Column(name="wanted_doc")
-    @Enumerated
-    DoctorEnum doctorEnum;
+    @Column(name = "chat_id")
+    private long chatId;
+    @Column(name = "first_name")
+    private String firstName;
+    @Column(name = "last_name")
+    private String lastName;
 }
